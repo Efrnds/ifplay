@@ -12,8 +12,8 @@ CREATE TABLE frequencia_atividade(
     ID INT AUTO_INCREMENT PRIMARY KEY,
     descricao VARCHAR(400),
     data DATE NOT NULL,
-    horario NOT NULL TIME;
-    situação VARCHAR(25),
+    horario TIME NOT NULL,
+    situacao VARCHAR(25),
     participante INT NOT NULL,
     FOREIGN KEY (participante) REFERENCES aluno(alunoID)
 );
