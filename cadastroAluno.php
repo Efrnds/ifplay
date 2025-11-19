@@ -26,31 +26,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <!DOCTYPE html>
 <html lang="pt-br">
-<head>
-<meta charset="UTF-8">
-<title>Cadastrar Aluno</title>
-</head>
-<body>
+    <head>
+        <meta charset="UTF-8">
+        <title>Cadastrar Aluno</title>
+    </head>
+    <body>
 
-<h2>Cadastro de Alunos</h2>
+        <h2>Cadastro de Alunos</h2>
 
-<?php if ($mensagem) echo $mensagem; ?>
+        <?php if ($mensagem) echo $mensagem; ?>
 
-<form method="POST">
-    <label>Nome:</label><br>
-    <input type="text" name="nome" required><br><br>
+        <form method="POST">
+            <label>Nome:</label><br>
+            <input type="text" name="nome" required><br><br>
 
-    <label>Matrícula:</label><br>
-    <input type="text" name="matricula" required><br><br>
+            <label>Matrícula:</label><br>
+            <input type="text" name="matricula" required><br><br>
 
-    <label>Ano de Entrada:</label><br>
-    <input type="date" name="anoEntrada" required><br><br>
+            <label>Ano de Entrada:</label><br>
+            <input type="date" name="anoEntrada" required><br><br>
 
-    <button type="submit">Cadastrar</button>
-</form>
+            <button type="submit">Cadastrar</button>
+        </form>
 
-<br>
-<a href="listarAluno.php">Ver alunos cadastrados</a>
+        <br>
+        <a href="listarAluno.php">Ver alunos cadastrados</a>
 
-</body>
+    </body>
 </html>

@@ -8,7 +8,6 @@ if (!isset($_GET['id'])) {
 $alunoID = $_GET['id'];
 $mensagem = "";
 
-// Buscar aluno
 $sql = "SELECT * FROM aluno WHERE alunoID = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $alunoID);
@@ -20,7 +19,6 @@ if (!$aluno) {
     die("Aluno não encontrado.");
 }
 
-// Atualizar status
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $novoStatus = $_POST['status'];
@@ -31,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($stmtUpdate->execute()) {
         $mensagem = "<p style='color:green'>Status atualizado com sucesso!</p>";
-        $aluno['status'] = $novoStatus; // Atualiza para refletir na tela
+        $aluno['status'] = $novoStatus;
     } else {
         $mensagem = "<p style='color:red'>Erro ao atualizar: " . $stmtUpdate->error . "</p>";
     }
@@ -39,35 +37,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 
 <!DOCTYPE html>
-<html lang="pt-br">
-<head>
-<meta charset="UTF-8">
-<title>Editar Aluno</title>
-</head>
-<body>
+    <html lang="pt-br">
+    <head>
+        <meta charset="UTF-8">
+        <title>Editar Aluno</title>
+    </head>
+    <body>
 
-<h2>Editar Aluno</h2>
+        <h2>Editar Aluno</h2>
 
-<?php if ($mensagem) echo $mensagem; ?>
+        <?php if ($mensagem) echo $mensagem; ?>
 
-<p><strong>Nome:</strong> <?= $aluno['nome'] ?></p>
-<p><strong>Matrícula:</strong> <?= $aluno['matricula'] ?></p>
-<p><strong>Ano de Entrada:</strong> <?= $aluno['anoEntrada'] ?></p>
+        <p><strong>Nome:</strong> <?= $aluno['nome'] ?></p>
+        <p><strong>Matrícula:</strong> <?= $aluno['matricula'] ?></p>
+        <p><strong>Ano de Entrada:</strong> <?= $aluno['anoEntrada'] ?></p>
 
-<form method="POST">
+        <form method="POST">
 
-    <label>Status:</label><br>
-    <select name="status">
-        <option value="1" <?= $aluno['status'] ? 'selected' : '' ?>>Ativo</option>
-        <option value="0" <?= !$aluno['status'] ? 'selected' : '' ?>>Inativo</option>
-    </select>
-    <br><br>
+            <label>Status:</label><br>
+            <select name="status">
+                <option value="1" <?= $aluno['status'] ? 'selected' : '' ?>>Ativo</option>
+                <option value="0" <?= !$aluno['status'] ? 'selected' : '' ?>>Inativo</option>
+            </select>
+            <br><br>
 
-    <button type="submit">Salvar Alterações</button>
-</form>
+            <button type="submit">Salvar Alterações</button>
+        </form>
 
-<br>
-<a href="listarAluno.php">Voltar à lista</a>
+        <br>
+        <a href="listarAluno.php">Voltar à lista</a>
 
-</body>
+    </body>
 </html>
