@@ -1,11 +1,12 @@
+-- DROP DATABASE IFPlay_db;
 CREATE DATABASE IFPlay_db;
 USE IFPlay_db;
 CREATE TABLE aluno(
     alunoID INT AUTO_INCREMENT PRIMARY KEY,
-    nome VARCHAR(150) NOT NULL UNIQUE,
+    nome VARCHAR(150) NOT NULL,
     matricula VARCHAR(25) NOT NULL UNIQUE,
-    anoEntrada DATE NOT NULL UNIQUE,
-    status BOOLEAN DEFAULT 0
+    anoEntrada DATE NOT NULL,
+    status BOOLEAN DEFAULT 1
 );
 
 CREATE TABLE frequencia_atividade(
