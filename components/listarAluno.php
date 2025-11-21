@@ -1,5 +1,5 @@
 <?php
-require_once "conexao.php";
+require_once "../utils/conexao.php";
 
 $sql = "SELECT alunoID, nome, matricula, anoEntrada, status FROM aluno ORDER BY nome";
 $result = $conn->query($sql);

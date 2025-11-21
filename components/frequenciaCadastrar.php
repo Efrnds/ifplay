@@ -1,5 +1,5 @@
 <?php
-require("conexao.php");
+require("../utils/conexao.php");
 
 function listarAlunos($conn) {
     $sql = "SELECT alunoID, nome, matricula FROM aluno ORDER BY nome ASC";

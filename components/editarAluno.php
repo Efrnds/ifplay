@@ -1,5 +1,5 @@
 <?php
-require_once "conexao.php";
+require_once "../utils/conexao.php";
 
 if (!isset($_GET['id'])) {
     die("ID do aluno não informado.");

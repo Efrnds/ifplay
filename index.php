@@ -1,2 +1,2 @@
-<a href="listarAluno.php">ver alunos</a>
-<a href="frequenciaCadastrar.php">Frequencia</a>
+<a href="./components/listarAluno.php">ver alunos</a>
+<a href="./components/frequenciaCadastrar.php">Frequencia</a>
