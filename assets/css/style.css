@@ -1,0 +1,54 @@
+:root{
+  --color-background: #ffffff;
+  --color-foreground: #2F9E41; 
+  --color-text: #000000;  
+  --color-surface: #EFEFEF;
+  --color-button: #CD191E;
+}
+
+*{
+  margin: 0;
+  padding: 0;
+}
+
+body{
+  display: flex;
+  flex-direction: column;
+  width: 100dvw;
+  width: 100vw;
+  font-family: "Arial", sans-serif;
+}
+
+.header{
+  background: var(--color-background);
+  display: flex;
+  width: calc(100% - 2rem);
+  padding: 1rem;
+  justify-content: space-between;
+  box-shadow: 0px 0px 5px 1px #656565;
+}
+
+.logo, .nav { 
+  display: flex;
+  gap: .5rem;
+  
+}
+
+.logo h1 {
+  margin: auto 0;
+}
+
+.nav a {
+  background-color: var(--color-button);
+  text-decoration: none;
+  font-weight: bold;
+  color: var(--color-background);
+  margin: auto 0;
+  padding: .4rem 1rem;
+  border-radius: .2rem;
+  transition: ease .2s;
+
+  &:hover {
+    background-color: color-mix(in srgb, var(--color-button) 80%, transparent);
+  }
+}
