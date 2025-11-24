@@ -1,26 +1,14 @@
 <?php
-require_once "../utils/conexao.php";
-
-if (!isset($_GET['id'])) {
-    die("ID do aluno não informado.");
+if (!isset($conn)) {
+    require_once "../utils/conexao.php";
 }
 
-$alunoID = $_GET['id'];
 $mensagem = "";
+$mensagemTipo = "";
 
-$sql = "SELECT * FROM aluno WHERE alunoID = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $alunoID);
-$stmt->execute();
-$result = $stmt->get_result();
-$aluno = $result->fetch_assoc();
-
-if (!$aluno) {
-    die("Aluno não encontrado.");
-}
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
+// Processar edição
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_aluno'])) {
+    $alunoID = $_POST['alunoID'];
     $novoStatus = $_POST['status'];
 
     $sqlUpdate = "UPDATE aluno SET status = ? WHERE alunoID = ?";
@@ -28,44 +16,72 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmtUpdate->bind_param("ii", $novoStatus, $alunoID);
 
     if ($stmtUpdate->execute()) {
-        $mensagem = "<p style='color:green'>Status atualizado com sucesso!</p>";
-        $aluno['status'] = $novoStatus;
+        $mensagem = "Status atualizado com sucesso!";
+        $mensagemTipo = "success";
+
+        // Detecta o caminho correto baseado no $nivel
+        $redirectPath = isset($nivel) && $nivel === './' ? './' : '../';
+
+        echo "<script>
+            setTimeout(() => {
+                window.location.href = '{$redirectPath}';
+            }, 1500);
+        </script>";
     } else {
-        $mensagem = "<p style='color:red'>Erro ao atualizar: " . $stmtUpdate->error . "</p>";
+        $mensagem = "Erro ao atualizar: " . $stmtUpdate->error;
+        $mensagemTipo = "error";
     }
 }
 ?>
 
-<!DOCTYPE html>
-    <html lang="pt-br">
-    <head>
-        <meta charset="UTF-8">
-        <title>Editar Aluno</title>
-    </head>
-    <body>
-
-        <h2>Editar Aluno</h2>
-
-        <?php if ($mensagem) echo $mensagem; ?>
-
-        <p><strong>Nome:</strong> <?= $aluno['nome'] ?></p>
-        <p><strong>Matrícula:</strong> <?= $aluno['matricula'] ?></p>
-        <p><strong>Ano de Entrada:</strong> <?= $aluno['anoEntrada'] ?></p>
+<div id="modalEditar" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Editar Aluno</h2>
+            <button class="modal-close" onclick="closeModal('modalEditar')">&times;</button>
+        </div>
 
         <form method="POST">
+            <div class="modal-body">
+                <?php if ($mensagem): ?>
+                    <div class="alert alert-<?= $mensagemTipo ?>">
+                        <?= $mensagem ?>
+                    </div>
+                <?php endif; ?>
 
-            <label>Status:</label><br>
-            <select name="status">
-                <option value="1" <?= $aluno['status'] ? 'selected' : '' ?>>Ativo</option>
-                <option value="0" <?= !$aluno['status'] ? 'selected' : '' ?>>Inativo</option>
-            </select>
-            <br><br>
+                <input type="hidden" name="alunoID" id="editAlunoID">
 
-            <button type="submit">Salvar Alterações</button>
+                <div class="form-group">
+                    <label>Nome:</label>
+                    <input type="text" id="editNome" disabled
+                        style="background-color: var(--color-surface); cursor: not-allowed;">
+                </div>
+
+                <div class="form-group">
+                    <label>Matrícula:</label>
+                    <input type="text" id="editMatricula" disabled
+                        style="background-color: var(--color-surface); cursor: not-allowed;">
+                </div>
+
+                <div class="form-group">
+                    <label>Ano de Entrada:</label>
+                    <input type="text" id="editAnoEntrada" disabled
+                        style="background-color: var(--color-surface); cursor: not-allowed;">
+                </div>
+
+                <div class="form-group">
+                    <label for="status">Status:</label>
+                    <select id="editStatus" name="status">
+                        <option value="1">Ativo</option>
+                        <option value="0">Inativo</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('modalEditar')">Cancelar</button>
+                <button type="submit" name="editar_aluno" class="btn">Salvar Alterações</button>
+            </div>
         </form>
-
-        <br>
-        <a href="listarAluno.php">Voltar à lista</a>
-
-    </body>
-</html>
+    </div>
+</div>

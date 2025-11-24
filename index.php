@@ -1,15 +1,33 @@
 <?php
+require_once './utils/conexao.php';
+
 ob_start();
 ?>
 
-<div class="card text-center">
+<div class="card col-span-2">
   <h2>Bem-vindo ao IFPlay</h2>
   <p>Sistema de Gerenciamento de Alunos e Frequências</p>
-  <div class="mt-2">
-    <a href="components/listarAluno.php" class="btn">Ver Alunos</a>
-    <a href="components/frequenciaCadastrar.php" class="btn btn-secondary">Frequências</a>
-  </div>
 </div>
+
+
+<?php
+// Configura variáveis para o include
+$is_included = true;
+$limit = 5;
+$nivel = './';
+
+// Inclui a lista de alunos
+include './components/listarAluno.php';
+
+// Inclui a lista de frequências
+include './components/listarFrequencia.php';
+
+// Inclui os modais
+include './components/cadastroAluno.php';
+include './components/editarAluno.php';
+include './components/cadastroFrequencia.php';
+include './components/editarFrequencia.php';
+?>
 
 <?php
 $conteudo = ob_get_clean();

@@ -1,81 +1,93 @@
 <?php
-require_once "../utils/conexao.php";
-
-if (!isset($_GET['id'])) {
-    die("ID não informado.");
+if (!isset($conn)) {
+    require_once "../utils/conexao.php";
 }
 
-$id = $_GET['id'];
 $mensagem = "";
+$mensagemTipo = "";
 
-$sql = "SELECT f.*, a.nome, a.matricula
-        FROM frequencia_atividade f
-        INNER JOIN aluno a ON f.participante = a.alunoID
-        WHERE f.ID = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $id);
-$stmt->execute();
-$result = $stmt->get_result();
-$freq = $result->fetch_assoc();
-
-if (!$freq) {
-    die("Registro não encontrado.");
-}
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['situacao'])) {
-
-    $situacao = $_POST['situacao'];
+// Processar edição
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_frequencia'])) {
+    $frequenciaID = $_POST['frequenciaID'];
+    $novaSituacao = $_POST['situacao'];
 
     $sqlUpdate = "UPDATE frequencia_atividade SET situacao = ? WHERE ID = ?";
-    $stmt2 = $conn->prepare($sqlUpdate);
-    $stmt2->bind_param("si", $situacao, $id);
+    $stmtUpdate = $conn->prepare($sqlUpdate);
+    $stmtUpdate->bind_param("si", $novaSituacao, $frequenciaID);
 
-    if ($stmt2->execute()) {
-        $mensagem = "<p style='color:green'>Situação atualizada com sucesso!</p>";
-        $freq['situacao'] = $situacao;
+    if ($stmtUpdate->execute()) {
+        $mensagem = "Situação atualizada com sucesso!";
+        $mensagemTipo = "success";
+
+        $redirectPath = isset($nivel) && $nivel === './' ? './' : '../';
+
+        echo "<script>
+            setTimeout(() => {
+                window.location.href = '{$redirectPath}';
+            }, 1500);
+        </script>";
     } else {
-        $mensagem = "<p style='color:red'>Erro: " . $stmt2->error . "</p>";
+        $mensagem = "Erro ao atualizar: " . $stmtUpdate->error;
+        $mensagemTipo = "error";
     }
 }
 ?>
 
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>Editar Frequência</title>
-    </head>
-    <body>
-
-        <h2>Editar Frequência</h2>
-
-        <?= $mensagem ?>
-
-        <p><strong>Aluno:</strong> <?= $freq['nome'] ?> (<?= $freq['matricula'] ?>)</p>
-        <p><strong>Data:</strong> <?= $freq['data'] ?></p>
-        <p><strong>Carga Horária:</strong> <?= $freq['horario'] ?></p>
-        <p><strong>Descrição:</strong> <?= $freq['descricao'] ?></p>
+<div id="modalEditarFrequencia" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Editar Frequência</h2>
+            <button class="modal-close" onclick="closeModal('modalEditarFrequencia')">&times;</button>
+        </div>
 
         <form method="POST">
-            <label><strong>Situação:</strong></label><br>
-            <select name="situacao" required>
-                <option value="Aguardando aprovação do professor"
-                    <?= $freq['situacao'] == "Aguardando aprovação do professor" ? "selected" : "" ?>>
-                    Aguardando aprovação do professor
-                </option>
+            <div class="modal-body">
+                <?php if ($mensagem): ?>
+                    <div class="alert alert-<?= $mensagemTipo ?>">
+                        <?= $mensagem ?>
+                    </div>
+                <?php endif; ?>
 
-                <option value="Validado"
-                    <?= $freq['situacao'] == "Validado" ? "selected" : "" ?>>
-                    Validado
-                </option>
-            </select>
-            <br><br>
+                <input type="hidden" name="frequenciaID" id="editFreqID">
 
-            <button type="submit">Salvar Alterações</button>
+                <div class="form-group">
+                    <label>Descrição:</label>
+                    <textarea id="editFreqDescricao" disabled
+                        style="background-color: var(--color-surface); cursor: not-allowed;" rows="3"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Data:</label>
+                    <input type="text" id="editFreqData" disabled
+                        style="background-color: var(--color-surface); cursor: not-allowed;">
+                </div>
+
+                <div class="form-group">
+                    <label>Carga Horária:</label>
+                    <input type="text" id="editFreqHorario" disabled
+                        style="background-color: var(--color-surface); cursor: not-allowed;">
+                </div>
+
+                <div class="form-group">
+                    <label>Aluno:</label>
+                    <input type="text" id="editFreqAluno" disabled
+                        style="background-color: var(--color-surface); cursor: not-allowed;">
+                </div>
+
+                <div class="form-group">
+                    <label for="situacao">Situação:</label>
+                    <select id="editFreqSituacao" name="situacao">
+                        <option value="Pendente">Pendente</option>
+                        <option value="Validado">Validado</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary"
+                    onclick="closeModal('modalEditarFrequencia')">Cancelar</button>
+                <button type="submit" name="editar_frequencia" class="btn">Salvar Alterações</button>
+            </div>
         </form>
-
-        <br>
-        <a href="frequenciaCadastrar.php">Voltar</a>
-
-    </body>
-</html>
+    </div>
+</div>

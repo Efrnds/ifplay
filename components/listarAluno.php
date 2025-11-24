@@ -1,52 +1,82 @@
 <?php
-require_once "../utils/conexao.php";
+// Se não foi incluído de outro arquivo, faz a conexão
+if (!isset($conn)) {
+    require_once "../utils/conexao.php";
+}
 
 $sql = "SELECT alunoID, nome, matricula, anoEntrada, status FROM aluno ORDER BY nome";
+if (isset($limit)) {
+    $sql .= " LIMIT " . (int) $limit;
+}
 $result = $conn->query($sql);
+
+// Se não for include, inicia o buffer
+if (!isset($is_included)) {
+    ob_start();
+}
 ?>
 
-<!DOCTYPE html>
-    <html lang="pt-br">
-    <head>
-        <meta charset="UTF-8">
-        <title>Lista de Alunos</title>
-    </head>
-    <body>
+<div class="card col-span-1">
+    <div class="flex flex-1 justify-between">
+        <div class="flex-1">
+            <h2>Alunos Cadastrados</h2>
+            <p style="color: var(--color-muted); font-size: 0.875rem;">Gerencie os alunos cadastrados no sistema</p>
+        </div>
+        <button class="btn" onclick="openModal('modalCadastro')">Cadastrar novo aluno</button>
+    </div>
 
-        <h2>Alunos Cadastrados</h2>
-
-        <a href="cadastroAluno.php">Cadastrar novo aluno</a>
-        <br><br>
-
-        <table border="1" cellpadding="7">
-            <tr>
-                <th>ID</th>
-                <th>Nome</th>
-                <th>Matrícula</th>
-                <th>Ano de Entrada</th>
-                <th>Status</th>
-                <th>Ações</th>
-            </tr>
-
-            <?php if ($result->num_rows > 0): ?>
-                <?php while ($row = $result->fetch_assoc()): ?>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Matrícula</th>
+                    <th>Ano de Entrada</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if ($result->num_rows > 0): ?>
+                    <?php while ($row = $result->fetch_assoc()): ?>
+                        <tr>
+                            <td><?= $row['alunoID'] ?></td>
+                            <td><?= htmlspecialchars($row['nome']) ?></td>
+                            <td><?= htmlspecialchars($row['matricula']) ?></td>
+                            <td><?= date('Y', strtotime($row['anoEntrada'])) ?></td>
+                            <td>
+                                <span class="status-badge <?= $row['status'] ? 'ativo' : 'inativo' ?>">
+                                    <?= $row['status'] ? 'Ativo' : 'Inativo' ?>
+                                </span>
+                            </td>
+                            <td>
+                                <div class="table-actions">
+                                    <a href="<?= isset($nivel) ? $nivel : '' ?>?editar=<?= $row['alunoID'] ?>"
+                                        onclick="event.preventDefault(); openEditModal(<?= $row['alunoID'] ?>, '<?= htmlspecialchars($row['nome'], ENT_QUOTES) ?>', '<?= htmlspecialchars($row['matricula'], ENT_QUOTES) ?>', '<?= date('Y', strtotime($row['anoEntrada'])) ?>', <?= $row['status'] ?>)">
+                                        Editar
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    <?php endwhile; ?>
+                <?php else: ?>
                     <tr>
-                        <td><?= $row['alunoID'] ?></td>
-                        <td><?= $row['nome'] ?></td>
-                        <td><?= $row['matricula'] ?></td>
-                        <td><?= $row['anoEntrada'] ?></td>
-                        <td><?= $row['status'] ? 'Ativo' : 'Inativo' ?></td>
-                        <td>
-                            <a href="editarAluno.php?id=<?= $row['alunoID'] ?>">Editar</a>
+                        <td colspan="6" style="text-align: center; color: var(--color-muted);">
+                            Nenhum aluno encontrado.
                         </td>
                     </tr>
-                <?php endwhile; ?>
-            <?php else: ?>
-                <tr>
-                    <td colspan="6">Nenhum aluno encontrado.</td>
-                </tr>
-            <?php endif; ?>
+                <?php endif; ?>
+            </tbody>
         </table>
+    </div>
+</div>
 
-    </body>
-</html>
+<?php
+// Se não for include, renderiza o layout
+if (!isset($is_included)) {
+    $conteudo = ob_get_clean();
+    require_once '../layout.php';
+    echo renderLayout('Lista de Alunos', $conteudo, '../');
+}
+?>
