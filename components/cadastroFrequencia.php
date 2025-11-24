@@ -92,15 +92,15 @@ if (!isset($is_included)) {
                     <label for="participante">Participante:</label>
                     <select id="participante" name="participante" required>
                         <option value="">Selecione um aluno...</option>
-                        <?php 
+                        <?php
                         if ($resultAlunos) {
                             $resultAlunos->data_seek(0);
-                            while ($aluno = $resultAlunos->fetch_assoc()): 
-                        ?>
-                            <option value="<?= $aluno['alunoID'] ?>">
-                                <?= htmlspecialchars($aluno['nome']) ?> - <?= htmlspecialchars($aluno['matricula']) ?>
-                            </option>
-                        <?php 
+                            while ($aluno = $resultAlunos->fetch_assoc()):
+                                ?>
+                                <option value="<?= $aluno['alunoID'] ?>">
+                                    <?= htmlspecialchars($aluno['nome']) ?> - <?= htmlspecialchars($aluno['matricula']) ?>
+                                </option>
+                            <?php
                             endwhile;
                         }
                         ?>
@@ -109,7 +109,8 @@ if (!isset($is_included)) {
             </div>
 
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('modalCadastroFrequencia')">Cancelar</button>
+                <button type="button" class="btn btn-secondary"
+                    onclick="closeModal('modalCadastroFrequencia')">Cancelar</button>
                 <button type="submit" name="cadastrar_frequencia" class="btn">Cadastrar</button>
             </div>
         </form>
