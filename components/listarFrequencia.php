@@ -21,8 +21,8 @@ if (!isset($is_included)) {
 ?>
 
 <div class="card col-span-1">
-  <div class="flex flex-1 justify-between">
-    <div class="flex-1">
+  <div class="card-header">
+    <div class="card-header-content">
       <h2>Frequências Cadastradas</h2>
       <p style="color: var(--color-muted); font-size: 0.875rem;">Gerencie as frequências de atividades</p>
     </div>
