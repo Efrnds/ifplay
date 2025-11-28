@@ -5,7 +5,6 @@ function renderLayout($titulo, $conteudo, $nivel = '../')
   ?>
   <!DOCTYPE html>
   <html lang="pt-br">
-
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,9 +19,7 @@ function renderLayout($titulo, $conteudo, $nivel = '../')
         <img src="<?= $nivel ?>assets/img/logo.svg" alt="Logo IFPlay">
         <h1>IFPlay</h1>
       </div>
-      <nav class="nav">
-        <a class="btn" href="<?= $nivel ?>/">Início</a>
-      </nav>
+    
     </header>
 
     <main class="main">
