@@ -4,10 +4,8 @@ if (!isset($conn)) {
     require_once "../utils/conexao.php";
 }
 
-$sql = "SELECT alunoID, nome, matricula, anoEntrada, status FROM aluno ORDER BY nome";
-if (isset($limit)) {
-    $sql .= " LIMIT " . (int) $limit;
-}
+$sql = "SELECT alunoID, nome, matricula, anoEntrada, status FROM aluno ORDER BY status desc ";
+
 $result = $conn->query($sql);
 
 // Se não for include, inicia o buffer
@@ -18,11 +16,11 @@ if (!isset($is_included)) {
 
 <div class="card col-span-1">
     <div class="flex flex-1 justify-between">
-        <div class="flex-1">
+        <div class="flex-1 ">
             <h2>Alunos Cadastrados</h2>
             <p style="color: var(--color-muted); font-size: 0.875rem;">Gerencie os alunos cadastrados no sistema</p>
         </div>
-        <button class="btn" onclick="openModal('modalCadastro')">Cadastrar novo aluno</button>
+        <button class="btn" onclick="openModal('modalCadastro')">Novo Aluno</button>
     </div>
 
     <div class="table-wrapper">

@@ -13,7 +13,6 @@ ob_start();
 <?php
 // Configura variáveis para o include
 $is_included = true;
-$limit = 5;
 $nivel = './';
 
 // Inclui a lista de alunos

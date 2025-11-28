@@ -26,7 +26,7 @@ if (!isset($is_included)) {
       <h2>Frequências Cadastradas</h2>
       <p style="color: var(--color-muted); font-size: 0.875rem;">Gerencie as frequências de atividades</p>
     </div>
-    <button class="btn" onclick="openModal('modalCadastroFrequencia')">Cadastrar frequência</button>
+    <button class="btn" onclick="openModal('modalCadastroFrequencia')">Nova Frequência</button>
   </div>
 
   <div class="table-wrapper">
