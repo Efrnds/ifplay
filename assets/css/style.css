@@ -114,6 +114,17 @@ body {
   box-shadow: var(--shadow-md);
 }
 
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.card-header-content {
+  flex: 1;
+}
+
 
 /* Table Wrapper for Scroll */
 .table-wrapper {
@@ -421,19 +432,40 @@ table td a {
   }
 
   .card {
-    padding: .5rem;
+    padding: 0.75rem;
+    gap: 0.5rem;
+  }
+
+  .card-header {
+    align-items: center;
+    gap: 0.5rem;
   }
 
   .card h2 {
-    font-size: 16pt;
+    font-size: 1.125rem;
+    margin: 0;
   }
 
   .card p {
-    font-size: 12pt;
+    font-size: 0.75rem;
     word-wrap: break-word;
+    margin-top: 0.25rem;
   }
-  table th, table td {
+
+  .btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+    white-space: nowrap;
+  }
+
+  .table-wrapper {
+    max-height: 60vh;
+  }
+
+  table th,
+  table td {
     padding: 0.25rem .5rem;
+    font-size: 0.75rem;
   }
 
   /* Esconder colunas ID e Ano de Entrada nas tabelas */
@@ -445,7 +477,7 @@ table td a {
   }
 
   table td:nth-child(1),
-  table td:nth-child(2){
-      word-break: break-all;
+  table td:nth-child(2) {
+    word-break: break-all;
   }
 }
