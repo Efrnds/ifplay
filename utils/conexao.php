@@ -1,7 +1,7 @@
 <?php
 $servername = "127.0.0.1";
-$username = "eduardo";
-$password = "123456";
+$username = "root";
+$password = "";
 $dbname = "IFPlay_db";
 
 $conn = new mysqli($servername, $username, $password, $dbname);
