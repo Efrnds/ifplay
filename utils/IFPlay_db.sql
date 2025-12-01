@@ -12,13 +12,13 @@ CREATE TABLE frequencia_atividade (
     ID INT AUTO_INCREMENT PRIMARY KEY,
     descricao VARCHAR(400),
     data DATE NOT NULL,
-    horario TIME NOT NULL
+    horario TIME NOT NULL,
+    situacao VARCHAR(25) DEFAULT 'Pendente'
 );
 
 CREATE TABLE aluno_frequencia (
     alunoID INT NOT NULL,
     frequenciaID INT NOT NULL,
-    situacao VARCHAR(25) DEFAULT 'Pendente',
     PRIMARY KEY (alunoID, frequenciaID),
     FOREIGN KEY (alunoID) REFERENCES aluno (alunoID) ON DELETE CASCADE,
     FOREIGN KEY (frequenciaID) REFERENCES frequencia_atividade (ID) ON DELETE CASCADE

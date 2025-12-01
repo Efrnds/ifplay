@@ -6,15 +6,39 @@ if (!isset($conn)) {
 $mensagem = '';
 $mensagemTipo = '';
 
+// buscar alunos vinculados a uma frequência
+if (isset($_GET['ajax']) && $_GET['ajax'] === 'getAlunos' && isset($_GET['frequenciaID'])) {
+    header('Content-Type: application/json');
+    $frequenciaID = (int) $_GET['frequenciaID'];
+    
+    $sqlAlunos = "SELECT a.alunoID, a.nome, a.matricula 
+                  FROM aluno a
+                  INNER JOIN aluno_frequencia af ON a.alunoID = af.alunoID
+                  WHERE af.frequenciaID = ?
+                  ORDER BY a.nome ASC";
+    $stmtAlunos = $conn->prepare($sqlAlunos);
+    $stmtAlunos->bind_param('i', $frequenciaID);
+    $stmtAlunos->execute();
+    $resultAlunos = $stmtAlunos->get_result();
+    
+    $alunos = [];
+    while ($aluno = $resultAlunos->fetch_assoc()) {
+        $alunos[] = $aluno;
+    }
+    
+    $stmtAlunos->close();
+    echo json_encode($alunos);
+    exit;
+}
+
 // Processar edição
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_frequencia'])) {
     $frequenciaID = $_POST['frequenciaID'];
-    $alunoID = $_POST['alunoID'];
     $novaSituacao = $_POST['situacao'];
 
-    $sqlUpdate = 'UPDATE aluno_frequencia SET situacao = ? WHERE frequenciaID = ? AND alunoID = ?';
+    $sqlUpdate = 'UPDATE frequencia_atividade SET situacao = ? WHERE ID = ?';
     $stmtUpdate = $conn->prepare($sqlUpdate);
-    $stmtUpdate->bind_param('sii', $novaSituacao, $frequenciaID, $alunoID);
+    $stmtUpdate->bind_param('si', $novaSituacao, $frequenciaID);
 
     if ($stmtUpdate->execute()) {
         $mensagem = 'Situação atualizada com sucesso!';
@@ -50,7 +74,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_frequencia']))
                 <?php endif; ?>
 
                 <input type="hidden" name="frequenciaID" id="editFreqID">
-                <input type="hidden" name="alunoID" id="editFreqAlunoID">
 
                 <div class="form-group">
                     <label>Descrição:</label>
@@ -71,9 +94,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_frequencia']))
                 </div>
 
                 <div class="form-group">
-                    <label>Aluno:</label>
-                    <input type="text" id="editFreqAluno" disabled
-                        style="background-color: var(--color-surface); cursor: not-allowed;">
+                    <label>Alunos Vinculados:</label>
+                    <div id="editFreqAlunos" 
+                        style="max-height: 150px; overflow-y: auto; border: 1px solid var(--color-border); border-radius: 0.375rem; padding: 0.75rem; background: var(--color-surface); font-size: 0.875rem;">
+                        <span style="color: var(--color-muted);">Carregando...</span>
+                    </div>
                 </div>
 
                 <div class="form-group">

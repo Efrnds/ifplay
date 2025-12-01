@@ -49,15 +49,65 @@ function renderLayout($titulo, $conteudo, $nivel = '../')
         openModal('modalEditar');
       }
 
-      function openEditFreqModal(id, descricao, data, horario, aluno, alunoID, situacao) {
+      function openEditFreqModal(id, descricao, data, horario, situacao) {
         document.getElementById('editFreqID').value = id;
         document.getElementById('editFreqDescricao').value = descricao;
-        document.getElementById('editFreqData').value = new Date(data + 'T00:00:00').toLocaleDateString('pt-BR');
+        // Formata a data de YYYY-MM-DD para DD/MM/YYYY
+        if (data) {
+          const dateParts = data.split('-');
+          if (dateParts.length === 3) {
+            document.getElementById('editFreqData').value = dateParts[2] + '/' + dateParts[1] + '/' + dateParts[0];
+          } else {
+            document.getElementById('editFreqData').value = data;
+          }
+        }
         document.getElementById('editFreqHorario').value = horario;
-        document.getElementById('editFreqAluno').value = aluno;
-        document.getElementById('editFreqAlunoID').value = alunoID;
         document.getElementById('editFreqSituacao').value = situacao;
+        
+        // Buscar alunos vinculados
+        const alunosContainer = document.getElementById('editFreqAlunos');
+        alunosContainer.innerHTML = '<span style="color: var(--color-muted);">Carregando...</span>';
+        
+        // Determinar o caminho correto para o arquivo baseado na URL atual
+        let urlBase = '';
+        const pathname = window.location.pathname;
+        if (pathname.includes('/components/')) {
+          urlBase = '../components/editarFrequencia.php';
+        } else if (pathname.endsWith('/') || pathname.endsWith('/index.php')) {
+          urlBase = './components/editarFrequencia.php';
+        } else {
+          urlBase = 'components/editarFrequencia.php';
+        }
+        const url = urlBase + '?ajax=getAlunos&frequenciaID=' + id;
+        
+        fetch(url)
+          .then(response => response.json())
+          .then(alunos => {
+            if (alunos.length > 0) {
+              let html = '<ul style="list-style: none; padding: 0; margin: 0;">';
+              alunos.forEach(aluno => {
+                html += '<li style="padding: 0.5rem; margin-bottom: 0.25rem; border-bottom: 1px solid var(--color-border);">';
+                html += '<strong>' + escapeHtml(aluno.nome) + '</strong> - ' + escapeHtml(aluno.matricula);
+                html += '</li>';
+              });
+              html += '</ul>';
+              alunosContainer.innerHTML = html;
+            } else {
+              alunosContainer.innerHTML = '<span style="color: var(--color-muted);">Nenhum aluno vinculado.</span>';
+            }
+          })
+          .catch(error => {
+            console.error('Erro ao carregar alunos:', error);
+            alunosContainer.innerHTML = '<span style="color: var(--color-error);">Erro ao carregar alunos.</span>';
+          });
+        
         openModal('modalEditarFrequencia');
+      }
+      
+      function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
       }
 
       function openDeleteModal(id, nome) {

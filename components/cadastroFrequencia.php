@@ -24,24 +24,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cadastrar_frequencia'
             $mensagem = 'Erro: Selecione pelo menos um aluno.';
             $mensagemTipo = 'error';
         } else {
-            // Inserir na tabela frequencia_atividade
-            $sql = 'INSERT INTO frequencia_atividade (descricao, data, horario) 
-                    VALUES (?, ?, ?)';
+            // Inserir na tabela frequencia_atividade com situação
+            $sql = 'INSERT INTO frequencia_atividade (descricao, data, horario, situacao) 
+                    VALUES (?, ?, ?, ?)';
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param('sss', $descricao, $data, $horario);
+            $stmt->bind_param('ssss', $descricao, $data, $horario, $situacao);
 
             if ($stmt->execute()) {
                 // Obter o ID da frequência recém-criada
                 $frequenciaID = $conn->insert_id;
 
-                // Inserir múltiplos registros na tabela de junção aluno_frequencia com situação
-                $sql_relacao = 'INSERT INTO aluno_frequencia (alunoID, frequenciaID, situacao) VALUES (?, ?, ?)';
+                // Inserir múltiplos registros na tabela de junção aluno_frequencia
+                $sql_relacao = 'INSERT INTO aluno_frequencia (alunoID, frequenciaID) VALUES (?, ?)';
                 $stmt_relacao = $conn->prepare($sql_relacao);
 
                 $erro_relacao = false;
                 foreach ($participantes as $alunoID) {
                     $alunoID = (int) $alunoID;
-                    $stmt_relacao->bind_param('iis', $alunoID, $frequenciaID, $situacao);
+                    $stmt_relacao->bind_param('ii', $alunoID, $frequenciaID);
                     if (!$stmt_relacao->execute()) {
                         $erro_relacao = true;
                         $mensagem = 'Erro ao relacionar aluno com frequência: ' . $stmt_relacao->error;

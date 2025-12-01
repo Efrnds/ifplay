@@ -22,33 +22,39 @@ $where_freq = '';
 $condicoes = [];
 
 if (!empty($pesquisa_freq_sql)) {
-  $condicoes[] = "(a.nome LIKE '%$pesquisa_freq_sql%' OR a.matricula LIKE '%$pesquisa_freq_sql%' OR f.descricao LIKE '%$pesquisa_freq_sql%')";
+  $condicoes[] = "(EXISTS (
+    SELECT 1 FROM aluno_frequencia af2 
+    INNER JOIN aluno a2 ON af2.alunoID = a2.alunoID 
+    WHERE af2.frequenciaID = f.ID 
+    AND (a2.nome LIKE '%$pesquisa_freq_sql%' OR a2.matricula LIKE '%$pesquisa_freq_sql%')
+  ) OR f.descricao LIKE '%$pesquisa_freq_sql%')";
 }
 
 if (!empty($filtro_situacao_sql) && ($filtro_situacao_sql === 'Pendente' || $filtro_situacao_sql === 'Validado')) {
-  $condicoes[] = "af.situacao = '$filtro_situacao_sql'";
+  $condicoes[] = "f.situacao = '$filtro_situacao_sql'";
 }
 
 if (!empty($condicoes)) {
   $where_freq = 'WHERE ' . implode(' AND ', $condicoes);
 }
 
-// Conta o total de registros (com filtro de pesquisa)
-$sql_count_freq = "SELECT COUNT(*) as total 
+// Conta o total de registros (com filtro de pesquisa) - agora conta frequências únicas
+$sql_count_freq = "SELECT COUNT(DISTINCT f.ID) as total 
                    FROM frequencia_atividade f 
-                   INNER JOIN aluno_frequencia af ON f.ID = af.frequenciaID 
-                   INNER JOIN aluno a ON af.alunoID = a.alunoID 
                    $where_freq";
 $result_count_freq = $conn->query($sql_count_freq);
 $total_registros_freq = $result_count_freq->fetch_assoc()['total'];
 $total_paginas_freq = ceil($total_registros_freq / $registros_por_pagina_freq);
 
-// Consulta com LIMIT e OFFSET para paginação
-$sql = "SELECT f.*, a.nome, a.matricula, a.alunoID, af.situacao 
+// Consulta com LIMIT e OFFSET para paginação - agrupa por frequência
+$sql = "SELECT f.ID, f.descricao, f.data, f.horario, f.situacao,
+        COUNT(af.alunoID) as total_alunos,
+        GROUP_CONCAT(CONCAT(a.nome, ' (', a.matricula, ')') ORDER BY a.nome SEPARATOR ', ') as alunos
         FROM frequencia_atividade f
-        INNER JOIN aluno_frequencia af ON f.ID = af.frequenciaID
-        INNER JOIN aluno a ON af.alunoID = a.alunoID
+        LEFT JOIN aluno_frequencia af ON f.ID = af.frequenciaID
+        LEFT JOIN aluno a ON af.alunoID = a.alunoID
         $where_freq
+        GROUP BY f.ID, f.descricao, f.data, f.horario, f.situacao
         ORDER BY f.data DESC
         LIMIT $registros_por_pagina_freq OFFSET $offset_freq";
 
@@ -84,7 +90,7 @@ if (!isset($is_included)) {
       $param_string_export = !empty($params_export) ? '?' . implode('&', $params_export) : '';
       ?>
       <a href="<?= $url_export . $param_string_export ?>" class="btn btn-secondary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 0.25rem;">
-         Exportar Excel
+        Exportar Excel
       </a>
       <button class="btn" onclick="openModal('modalCadastroFrequencia')">Nova Frequência</button>
     </div>
@@ -121,7 +127,7 @@ if (!isset($is_included)) {
           <th>Descrição</th>
           <th>Data</th>
           <th>Carga Horária</th>
-          <th>Aluno</th>
+          <th>Participantes</th>
           <th>Situação</th>
           <th>Ações</th>
         </tr>
@@ -134,7 +140,20 @@ if (!isset($is_included)) {
               <td><?= htmlspecialchars($row['descricao']) ?></td>
               <td><?= date('d/m/Y', strtotime($row['data'])) ?></td>
               <td><?= $row['horario'] ?></td>
-              <td><?= htmlspecialchars($row['nome']) ?></td>
+              <td>
+                <?php if ($row['total_alunos'] > 0): ?>
+                  <span style="font-size: 0.875rem;" title="<?= htmlspecialchars($row['alunos']) ?>">
+                    <?= $row['total_alunos'] ?> aluno(s)
+                    <?php if (strlen($row['alunos']) > 50): ?>
+                      <br><small style="color: var(--color-muted);"><?= htmlspecialchars(substr($row['alunos'], 0, 50)) ?>...</small>
+                    <?php else: ?>
+                      <br><small style="color: var(--color-muted);"><?= htmlspecialchars($row['alunos']) ?></small>
+                    <?php endif; ?>
+                  </span>
+                <?php else: ?>
+                  <span style="color: var(--color-muted); font-size: 0.875rem;">Nenhum participante</span>
+                <?php endif; ?>
+              </td>
               <td>
                 <span class="status-badge <?= $row['situacao'] == 'Validado' ? 'ativo' : 'inativo' ?>">
                   <?= $row['situacao'] == 'Validado' ? 'Validado' : 'Pendente' ?>
@@ -143,7 +162,7 @@ if (!isset($is_included)) {
               <td>
                 <div class="table-actions">
                   <a href="<?= isset($nivel) ? $nivel : '' ?>?editarFreq=<?= $row['ID'] ?>"
-                    onclick="event.preventDefault(); openEditFreqModal(<?= $row['ID'] ?>, '<?= htmlspecialchars($row['descricao'], ENT_QUOTES) ?>', '<?= $row['data'] ?>', '<?= $row['horario'] ?>', '<?= htmlspecialchars($row['nome'], ENT_QUOTES) ?>', <?= $row['alunoID'] ?>, '<?= htmlspecialchars($row['situacao'], ENT_QUOTES) ?>')">
+                    onclick="event.preventDefault(); openEditFreqModal(<?= $row['ID'] ?>, '<?= htmlspecialchars($row['descricao'], ENT_QUOTES) ?>', '<?= $row['data'] ?>', '<?= $row['horario'] ?>', '<?= htmlspecialchars($row['situacao'], ENT_QUOTES) ?>')">
                     Editar
                   </a>
                 </div>

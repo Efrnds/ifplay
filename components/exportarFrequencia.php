@@ -17,14 +17,14 @@ if (!empty($pesquisa_freq_sql)) {
 }
 
 if (!empty($filtro_situacao_sql) && ($filtro_situacao_sql === 'Pendente' || $filtro_situacao_sql === 'Validado')) {
-  $condicoes[] = "af.situacao = '$filtro_situacao_sql'";
+  $condicoes[] = "f.situacao = '$filtro_situacao_sql'";
 }
 
 if (!empty($condicoes)) {
   $where_freq = 'WHERE ' . implode(' AND ', $condicoes);
 }
 
-$sql = "SELECT f.ID, f.descricao, f.data, f.horario, a.nome, a.matricula, af.situacao 
+$sql = "SELECT f.ID, f.descricao, f.data, f.horario, a.nome, a.matricula, f.situacao 
         FROM frequencia_atividade f
         INNER JOIN aluno_frequencia af ON f.ID = af.frequenciaID
         INNER JOIN aluno a ON af.alunoID = a.alunoID
@@ -72,5 +72,3 @@ if ($result->num_rows > 0) {
 
 echo '</table>';
 exit;
-?>
-
