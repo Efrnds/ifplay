@@ -1,7 +1,6 @@
-
 -- CREATE DATABASE IFPlay_db;
 -- USE IFPlay_db;
-CREATE TABLE aluno(
+CREATE TABLE aluno (
     alunoID INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(150) NOT NULL,
     matricula VARCHAR(25) NOT NULL UNIQUE,
@@ -9,12 +8,18 @@ CREATE TABLE aluno(
     status BOOLEAN DEFAULT 1
 );
 
-CREATE TABLE frequencia_atividade(
+CREATE TABLE frequencia_atividade (
     ID INT AUTO_INCREMENT PRIMARY KEY,
     descricao VARCHAR(400),
     data DATE NOT NULL,
     horario TIME NOT NULL,
-    situacao VARCHAR(25),
-    participante INT NOT NULL,
-    FOREIGN KEY (participante) REFERENCES aluno(alunoID)
+    situacao VARCHAR(25)
+);
+
+CREATE TABLE aluno_frequencia (
+    alunoID INT NOT NULL,
+    frequenciaID INT NOT NULL,
+    PRIMARY KEY (alunoID, frequenciaID),
+    FOREIGN KEY (alunoID) REFERENCES aluno (alunoID) ON DELETE CASCADE,
+    FOREIGN KEY (frequenciaID) REFERENCES frequencia_atividade (ID) ON DELETE CASCADE
 );
