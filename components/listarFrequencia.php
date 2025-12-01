@@ -66,7 +66,28 @@ if (!isset($is_included)) {
       <h2>Frequências Cadastradas</h2>
       <p style="color: var(--color-muted); font-size: 0.875rem;">Gerencie as frequências de atividades</p>
     </div>
-    <button class="btn" onclick="openModal('modalCadastroFrequencia')">Nova Frequência</button>
+    <div style="display: flex; gap: 0.5rem;">
+      <?php
+      // Monta a URL para exportação (mantém os filtros)
+      if (isset($nivel)) {
+        $url_export = $nivel . 'components/exportarFrequencia.php';
+      } else {
+        $url_export = 'exportarFrequencia.php';
+      }
+      $params_export = [];
+      if (!empty($pesquisa_freq)) {
+        $params_export[] = 'pesquisa_freq=' . urlencode($pesquisa_freq);
+      }
+      if (!empty($filtro_situacao)) {
+        $params_export[] = 'filtro_situacao=' . urlencode($filtro_situacao);
+      }
+      $param_string_export = !empty($params_export) ? '?' . implode('&', $params_export) : '';
+      ?>
+      <a href="<?= $url_export . $param_string_export ?>" class="btn btn-secondary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 0.25rem;">
+         Exportar Excel
+      </a>
+      <button class="btn" onclick="openModal('modalCadastroFrequencia')">Nova Frequência</button>
+    </div>
   </div>
 
   <!-- Barra de Pesquisa e Filtros -->
