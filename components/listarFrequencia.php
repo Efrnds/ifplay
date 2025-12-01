@@ -13,10 +13,24 @@ $offset_freq = ($pagina_atual_freq - 1) * $registros_por_pagina_freq;
 $pesquisa_freq = isset($_GET['pesquisa_freq']) ? trim($_GET['pesquisa_freq']) : '';
 $pesquisa_freq_sql = $conn->real_escape_string($pesquisa_freq);
 
-// Condição WHERE para pesquisa
+// Captura o filtro de situação
+$filtro_situacao = isset($_GET['filtro_situacao']) ? trim($_GET['filtro_situacao']) : '';
+$filtro_situacao_sql = $conn->real_escape_string($filtro_situacao);
+
+// Condição WHERE para pesquisa e filtro
 $where_freq = '';
+$condicoes = [];
+
 if (!empty($pesquisa_freq_sql)) {
-  $where_freq = "WHERE a.nome LIKE '%$pesquisa_freq_sql%' OR a.matricula LIKE '%$pesquisa_freq_sql%' OR f.descricao LIKE '%$pesquisa_freq_sql%'";
+  $condicoes[] = "(a.nome LIKE '%$pesquisa_freq_sql%' OR a.matricula LIKE '%$pesquisa_freq_sql%' OR f.descricao LIKE '%$pesquisa_freq_sql%')";
+}
+
+if (!empty($filtro_situacao_sql) && ($filtro_situacao_sql === 'Pendente' || $filtro_situacao_sql === 'Validado')) {
+  $condicoes[] = "af.situacao = '$filtro_situacao_sql'";
+}
+
+if (!empty($condicoes)) {
+  $where_freq = 'WHERE ' . implode(' AND ', $condicoes);
 }
 
 // Conta o total de registros (com filtro de pesquisa)
@@ -55,7 +69,7 @@ if (!isset($is_included)) {
     <button class="btn" onclick="openModal('modalCadastroFrequencia')">Nova Frequência</button>
   </div>
 
-  <!-- Barra de Pesquisa -->
+  <!-- Barra de Pesquisa e Filtros -->
   <div style="margin: 1rem 0;">
     <form method="GET" action="" style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
       <input type="text"
@@ -63,8 +77,16 @@ if (!isset($is_included)) {
         placeholder="Pesquisar por descrição, nome ou matrícula..."
         value="<?= htmlspecialchars($pesquisa_freq) ?>"
         style="flex: 1; min-width: 200px; padding: 0.5rem 1rem; border: 1px solid var(--color-border); border-radius: 0.375rem; background: var(--color-surface); color: var(--color-text);">
-      <button type="submit" class="btn" style="padding: 0.5rem 1rem;">Pesquisar</button>
-      <?php if (!empty($pesquisa_freq)): ?>
+
+      <select name="filtro_situacao"
+        style="padding: 0.5rem 1rem; border: 1px solid var(--color-border); border-radius: 0.375rem; background: var(--color-surface); color: var(--color-text); cursor: pointer;">
+        <option value="">Todas as situações</option>
+        <option value="Pendente" <?= $filtro_situacao === 'Pendente' ? 'selected' : '' ?>>Pendente</option>
+        <option value="Validado" <?= $filtro_situacao === 'Validado' ? 'selected' : '' ?>>Validado</option>
+      </select>
+
+      <button type="submit" class="btn" style="padding: 0.5rem 1rem;">Filtrar</button>
+      <?php if (!empty($pesquisa_freq) || !empty($filtro_situacao)): ?>
         <a href="<?= isset($nivel) ? $nivel : '?' ?>" class="btn" style="padding: 0.5rem 1rem; background: var(--color-muted);">Limpar</a>
       <?php endif; ?>
     </form>
@@ -121,15 +143,22 @@ if (!isset($is_included)) {
   <?php if ($total_paginas_freq > 1): ?>
     <div class="pagination" style="display: flex; justify-content: center; align-items: center; gap: 0.5rem; margin-top: 1.5rem; flex-wrap: wrap;">
       <?php
-      // Monta a URL base para paginação (mantém o termo de pesquisa)
+      // Monta a URL base para paginação (mantém o termo de pesquisa e filtro de situação)
       $url_base_freq = isset($nivel) ? $nivel : '?';
       $separador_freq = strpos($url_base_freq, '?') !== false ? '&' : '?';
-      $param_pesquisa_freq = !empty($pesquisa_freq) ? 'pesquisa_freq=' . urlencode($pesquisa_freq) . '&' : '';
+      $params = [];
+      if (!empty($pesquisa_freq)) {
+        $params[] = 'pesquisa_freq=' . urlencode($pesquisa_freq);
+      }
+      if (!empty($filtro_situacao)) {
+        $params[] = 'filtro_situacao=' . urlencode($filtro_situacao);
+      }
+      $param_string = !empty($params) ? implode('&', $params) . '&' : '';
       ?>
 
       <!-- Botão Anterior -->
       <?php if ($pagina_atual_freq > 1): ?>
-        <a href="<?= $url_base_freq . $separador_freq . $param_pesquisa_freq ?>pagina_freq=<?= $pagina_atual_freq - 1 ?>"
+        <a href="<?= $url_base_freq . $separador_freq . $param_string ?>pagina_freq=<?= $pagina_atual_freq - 1 ?>"
           class="btn" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
           ← Anterior
         </a>
@@ -145,8 +174,8 @@ if (!isset($is_included)) {
       $fim_freq = min($total_paginas_freq, $pagina_atual_freq + 2);
 
       if ($inicio_freq > 1):
-        ?>
-        <a href="<?= $url_base_freq . $separador_freq . $param_pesquisa_freq ?>pagina_freq=1"
+      ?>
+        <a href="<?= $url_base_freq . $separador_freq . $param_string ?>pagina_freq=1"
           class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.875rem;">1</a>
         <?php if ($inicio_freq > 2): ?>
           <span style="color: var(--color-muted);">...</span>
@@ -159,7 +188,7 @@ if (!isset($is_included)) {
             <?= $i ?>
           </span>
         <?php else: ?>
-          <a href="<?= $url_base_freq . $separador_freq . $param_pesquisa_freq ?>pagina_freq=<?= $i ?>"
+          <a href="<?= $url_base_freq . $separador_freq . $param_string ?>pagina_freq=<?= $i ?>"
             class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.875rem;">
             <?= $i ?>
           </a>
@@ -170,13 +199,13 @@ if (!isset($is_included)) {
         <?php if ($fim_freq < $total_paginas_freq - 1): ?>
           <span style="color: var(--color-muted);">...</span>
         <?php endif; ?>
-        <a href="<?= $url_base_freq . $separador_freq . $param_pesquisa_freq ?>pagina_freq=<?= $total_paginas_freq ?>"
+        <a href="<?= $url_base_freq . $separador_freq . $param_string ?>pagina_freq=<?= $total_paginas_freq ?>"
           class="btn" style="padding: 0.5rem 0.75rem; font-size: 0.875rem;"><?= $total_paginas_freq ?></a>
       <?php endif; ?>
 
       <!-- Botão Próximo -->
       <?php if ($pagina_atual_freq < $total_paginas_freq): ?>
-        <a href="<?= $url_base_freq . $separador_freq . $param_pesquisa_freq ?>pagina_freq=<?= $pagina_atual_freq + 1 ?>"
+        <a href="<?= $url_base_freq . $separador_freq . $param_string ?>pagina_freq=<?= $pagina_atual_freq + 1 ?>"
           class="btn" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
           Próximo →
         </a>
