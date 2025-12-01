@@ -10,6 +10,7 @@
   --color-border: #e5e7eb;
   --color-muted: #6b7280;
   --color-hover: #f9fafb;
+  --color-error: #dc3545;
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
 }
 

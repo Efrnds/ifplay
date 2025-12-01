@@ -24,6 +24,7 @@ include './components/listarFrequencia.php';
 // Inclui os modais
 include './components/cadastroAluno.php';
 include './components/editarAluno.php';
+include './components/excluirAluno.php';
 include './components/cadastroFrequencia.php';
 include './components/editarFrequencia.php';
 ?>
