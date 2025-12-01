@@ -18,22 +18,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cadastrar_frequencia'
         $participante = $_POST['participante'];
         $situacao = "Pendente"; // VARCHAR(25) - max 25 caracteres
 
-        $sql = "INSERT INTO frequencia_atividade (descricao, data, horario, situacao, participante) 
-                VALUES (?, ?, ?, ?, ?)";
+        // Inserir na tabela frequencia_atividade
+        $sql = "INSERT INTO frequencia_atividade (descricao, data, horario, situacao) 
+                VALUES (?, ?, ?, ?)";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ssssi", $descricao, $data, $horario, $situacao, $participante);
+        $stmt->bind_param("ssss", $descricao, $data, $horario, $situacao);
 
         if ($stmt->execute()) {
-            $mensagem = "Frequência cadastrada com sucesso!";
-            $mensagemTipo = "success";
+            // Obter o ID da frequência recém-criada
+            $frequenciaID = $conn->insert_id;
 
-            $redirectPath = isset($nivel) && $nivel === './' ? './' : '../';
+            // Inserir na tabela de junção aluno_frequencia
+            $sql_relacao = "INSERT INTO aluno_frequencia (alunoID, frequenciaID) VALUES (?, ?)";
+            $stmt_relacao = $conn->prepare($sql_relacao);
+            $stmt_relacao->bind_param("ii", $participante, $frequenciaID);
 
-            echo "<script>
-                setTimeout(() => {
-                    window.location.href = '{$redirectPath}';
-                }, 1500);
-            </script>";
+            if ($stmt_relacao->execute()) {
+                $mensagem = "Frequência cadastrada com sucesso!";
+                $mensagemTipo = "success";
+
+                $redirectPath = isset($nivel) && $nivel === './' ? './' : '../';
+
+                echo "<script>
+                    setTimeout(() => {
+                        window.location.href = '{$redirectPath}';
+                    }, 1500);
+                </script>";
+            } else {
+                $mensagem = "Erro ao relacionar aluno com frequência: " . $stmt_relacao->error;
+                $mensagemTipo = "error";
+            }
+            $stmt_relacao->close();
         } else {
             $mensagem = "Erro ao cadastrar: " . $stmt->error;
             $mensagemTipo = "error";
@@ -64,7 +79,6 @@ if (!isset($is_included)) {
             <h2>Cadastrar Nova Frequência</h2>
             <button class="modal-close" onclick="closeModal('modalCadastroFrequencia')">&times;</button>
         </div>
-        
         <form method="POST">
             <div class="modal-body">
                 <?php if ($mensagem): ?>
@@ -96,11 +110,11 @@ if (!isset($is_included)) {
                         if ($resultAlunos) {
                             $resultAlunos->data_seek(0);
                             while ($aluno = $resultAlunos->fetch_assoc()):
-                                ?>
+                        ?>
                                 <option value="<?= $aluno['alunoID'] ?>">
                                     <?= htmlspecialchars($aluno['nome']) ?> - <?= htmlspecialchars($aluno['matricula']) ?>
                                 </option>
-                            <?php
+                        <?php
                             endwhile;
                         }
                         ?>

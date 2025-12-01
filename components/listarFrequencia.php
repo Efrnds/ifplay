@@ -20,7 +20,11 @@ if (!empty($pesquisa_freq_sql)) {
 }
 
 // Conta o total de registros (com filtro de pesquisa)
-$sql_count_freq = "SELECT COUNT(*) as total FROM frequencia_atividade f INNER JOIN aluno a ON a.alunoID = f.participante $where_freq";
+$sql_count_freq = "SELECT COUNT(*) as total 
+                   FROM frequencia_atividade f 
+                   INNER JOIN aluno_frequencia af ON f.ID = af.frequenciaID 
+                   INNER JOIN aluno a ON af.alunoID = a.alunoID 
+                   $where_freq";
 $result_count_freq = $conn->query($sql_count_freq);
 $total_registros_freq = $result_count_freq->fetch_assoc()['total'];
 $total_paginas_freq = ceil($total_registros_freq / $registros_por_pagina_freq);
@@ -28,7 +32,8 @@ $total_paginas_freq = ceil($total_registros_freq / $registros_por_pagina_freq);
 // Consulta com LIMIT e OFFSET para paginação
 $sql = "SELECT f.*, a.nome, a.matricula 
         FROM frequencia_atividade f
-        INNER JOIN aluno a ON a.alunoID = f.participante
+        INNER JOIN aluno_frequencia af ON f.ID = af.frequenciaID
+        INNER JOIN aluno a ON af.alunoID = a.alunoID
         $where_freq
         ORDER BY f.data DESC
         LIMIT $registros_por_pagina_freq OFFSET $offset_freq";
