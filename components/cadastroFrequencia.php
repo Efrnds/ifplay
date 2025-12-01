@@ -25,23 +25,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cadastrar_frequencia'
             $mensagemTipo = 'error';
         } else {
             // Inserir na tabela frequencia_atividade
-            $sql = 'INSERT INTO frequencia_atividade (descricao, data, horario, situacao) 
-                    VALUES (?, ?, ?, ?)';
+            $sql = 'INSERT INTO frequencia_atividade (descricao, data, horario) 
+                    VALUES (?, ?, ?)';
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param('ssss', $descricao, $data, $horario, $situacao);
+            $stmt->bind_param('sss', $descricao, $data, $horario);
 
             if ($stmt->execute()) {
                 // Obter o ID da frequência recém-criada
                 $frequenciaID = $conn->insert_id;
 
-                // Inserir múltiplos registros na tabela de junção aluno_frequencia
-                $sql_relacao = 'INSERT INTO aluno_frequencia (alunoID, frequenciaID) VALUES (?, ?)';
+                // Inserir múltiplos registros na tabela de junção aluno_frequencia com situação
+                $sql_relacao = 'INSERT INTO aluno_frequencia (alunoID, frequenciaID, situacao) VALUES (?, ?, ?)';
                 $stmt_relacao = $conn->prepare($sql_relacao);
 
                 $erro_relacao = false;
                 foreach ($participantes as $alunoID) {
                     $alunoID = (int) $alunoID;
-                    $stmt_relacao->bind_param('ii', $alunoID, $frequenciaID);
+                    $stmt_relacao->bind_param('iis', $alunoID, $frequenciaID, $situacao);
                     if (!$stmt_relacao->execute()) {
                         $erro_relacao = true;
                         $mensagem = 'Erro ao relacionar aluno com frequência: ' . $stmt_relacao->error;
@@ -142,7 +142,7 @@ if (!isset($is_included)) {
                         if ($resultAlunos) {
                             $resultAlunos->data_seek(0);
                             while ($aluno = $resultAlunos->fetch_assoc()):
-                        ?>
+                                ?>
                                 <label style="display: flex; align-items: center; padding: 0.5rem; margin-bottom: 0.25rem; border-radius: 0.25rem; cursor: pointer; transition: background-color 0.15s ease;"
                                     class="aluno-item"
                                     data-nome="<?= htmlspecialchars(strtolower($aluno['nome'])) ?>"

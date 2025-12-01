@@ -49,12 +49,13 @@ function renderLayout($titulo, $conteudo, $nivel = '../')
         openModal('modalEditar');
       }
 
-      function openEditFreqModal(id, descricao, data, horario, aluno, situacao) {
+      function openEditFreqModal(id, descricao, data, horario, aluno, alunoID, situacao) {
         document.getElementById('editFreqID').value = id;
         document.getElementById('editFreqDescricao').value = descricao;
         document.getElementById('editFreqData').value = new Date(data + 'T00:00:00').toLocaleDateString('pt-BR');
         document.getElementById('editFreqHorario').value = horario;
         document.getElementById('editFreqAluno').value = aluno;
+        document.getElementById('editFreqAlunoID').value = alunoID;
         document.getElementById('editFreqSituacao').value = situacao;
         openModal('modalEditarFrequencia');
       }

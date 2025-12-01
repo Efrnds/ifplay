@@ -1,23 +1,24 @@
 <?php
 if (!isset($conn)) {
-    require_once "../utils/conexao.php";
+    require_once '../utils/conexao.php';
 }
 
-$mensagem = "";
-$mensagemTipo = "";
+$mensagem = '';
+$mensagemTipo = '';
 
 // Processar edição
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_frequencia'])) {
     $frequenciaID = $_POST['frequenciaID'];
+    $alunoID = $_POST['alunoID'];
     $novaSituacao = $_POST['situacao'];
 
-    $sqlUpdate = "UPDATE frequencia_atividade SET situacao = ? WHERE ID = ?";
+    $sqlUpdate = 'UPDATE aluno_frequencia SET situacao = ? WHERE frequenciaID = ? AND alunoID = ?';
     $stmtUpdate = $conn->prepare($sqlUpdate);
-    $stmtUpdate->bind_param("si", $novaSituacao, $frequenciaID);
+    $stmtUpdate->bind_param('sii', $novaSituacao, $frequenciaID, $alunoID);
 
     if ($stmtUpdate->execute()) {
-        $mensagem = "Situação atualizada com sucesso!";
-        $mensagemTipo = "success";
+        $mensagem = 'Situação atualizada com sucesso!';
+        $mensagemTipo = 'success';
 
         $redirectPath = isset($nivel) && $nivel === './' ? './' : '../';
 
@@ -27,8 +28,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_frequencia']))
             }, 1500);
         </script>";
     } else {
-        $mensagem = "Erro ao atualizar: " . $stmtUpdate->error;
-        $mensagemTipo = "error";
+        $mensagem = 'Erro ao atualizar: ' . $stmtUpdate->error;
+        $mensagemTipo = 'error';
     }
 }
 ?>
@@ -49,6 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_frequencia']))
                 <?php endif; ?>
 
                 <input type="hidden" name="frequenciaID" id="editFreqID">
+                <input type="hidden" name="alunoID" id="editFreqAlunoID">
 
                 <div class="form-group">
                     <label>Descrição:</label>
